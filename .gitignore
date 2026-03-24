@@ -1,0 +1,14 @@
+# .gitignore for TruvaDesktop
+bin/
+obj/
+MSIX_Build/
+*.msix
+*.pfx
+*.log
+.vs/
+.vs*
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+*.sln.docstates

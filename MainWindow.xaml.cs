@@ -448,7 +448,6 @@ namespace TruvaDesktop
 
         private async void BtnPremium_Click(object sender, RoutedEventArgs e)
         {
-#if WINDOWS_STORE_SUPPORT
             try
             {
                 var windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(this);
@@ -464,15 +463,13 @@ namespace TruvaDesktop
                 {
                     _isPremium = true;
                     UpdatePremiumUi();
+                    MessageBox.Show("Zaten aktif bir aboneliğiniz bulunuyor.", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Satın alma hatası: {ex.Message}", "Mağaza Hatası", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Satın alma işlemi başlatılamadı: {ex.Message}\n\nLütfen Microsoft Store üzerinden uygulamanın lisanslı olduğunu kontrol edin.", "Mağaza Hatası", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-#else
-            MessageBox.Show("Abonelik sistemi şu an geliştirme aşamasındadır (SDK yapılandırması gereklidir).", "Premium", MessageBoxButton.OK, MessageBoxImage.Information);
-#endif
         }
     }
 }

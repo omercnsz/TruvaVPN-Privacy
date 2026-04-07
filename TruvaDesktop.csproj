@@ -3,23 +3,48 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <Platforms>x64</Platforms>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <CsWinRTPackage>true</CsWinRTPackage>
+    <Version>1.0.5.7</Version>
+    <AssemblyVersion>1.0.5.7</AssemblyVersion>
+    <FileVersion>1.0.5.7</FileVersion>
+    <ApplicationIcon>Assets\truva_final_v1.ico</ApplicationIcon>
+    <PublishReadyToRun>false</PublishReadyToRun>
+    <TieredCompilation>false</TieredCompilation>
     <!-- Windows Store SDK Desteği Aktif -->
   </PropertyGroup>
 
+
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="Obfuscar" Version="2.2.38" PrivateAssets="all" />
     <None Update="sing-box.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="wintun.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="WinDivert.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="WinDivert64.sys">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Remove="Assets\logo.ico" />
+    <None Remove="Assets\main_icon.ico" />
+    <PackageReference Include="WindivertDotnet" Version="1.1.2" />
     <Resource Include="Assets\logo.png" />
     <PackageReference Include="System.Drawing.Common" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.1.1" />
   </ItemGroup>
-
 </Project>

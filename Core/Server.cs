@@ -26,12 +26,11 @@ namespace TruvaDesktop.Core
         
         public bool UdpSupported { get; set; }
         public bool IsFavorite { get; set; }
-        public bool IsPremium { get; set; }
 
         public string CountryCode => "US"; 
         
-        // Kullanıcı dostu görünen ad (Favori, Premium ve UDP bilgisini içerir)
-        public string DisplayName => $"{(IsFavorite ? "⭐ " : "")}{(IsPremium ? "👑 " : "")}{CountryName} ({Network?.ToUpper()}{(UdpSupported ? ", UDP" : "")})";
+        // Kullanıcı dostu görünen ad (Favori ve UDP bilgisini içerir)
+        public string DisplayName => $"{(IsFavorite ? "⭐ " : "")}{CountryName} ({Network?.ToUpper()}{(UdpSupported ? ", UDP" : "")})";
     }
 
     public class ScraperRoot

@@ -4,7 +4,7 @@
          xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities" 
          IgnorableNamespaces="uap rescap">
          
-  <Identity Name="TruvaVPN.Truva" Publisher="CN=B228A67A-8A73-434D-AFFE-F0D297936EF5" Version="1.0.0.0" />
+  <Identity Name="TruvaVPN.Truva" Publisher="CN=B228A67A-8A73-434D-AFFE-F0D297936EF5" Version="1.0.4.0" ProcessorArchitecture="x64" />
   
   <Properties>
     <DisplayName>Truva</DisplayName>
@@ -31,8 +31,8 @@
   
   <Capabilities>
     <Capability Name="internetClient" />
-    <uap:Capability Name="storePurchase" />
     <rescap:Capability Name="networkingVpnProvider" />
     <rescap:Capability Name="runFullTrust" />
+    <rescap:Capability Name="allowElevation" />
   </Capabilities>
 </Package>

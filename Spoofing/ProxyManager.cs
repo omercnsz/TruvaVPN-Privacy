@@ -42,12 +42,29 @@ namespace TruvaDesktop.Spoofing
                     if (registry != null)
                     {
                         registry.SetValue("ProxyEnable", 0);
+                        registry.DeleteValue("ProxyServer", false);
+                        registry.DeleteValue("ProxyOverride", false);
+                        registry.DeleteValue("AutoConfigURL", false);
                     }
                 }
+                
+                // Kalıntı ikili (binary) bağlantı ayarlarını temizle
+                try
+                {
+                    using (RegistryKey? connKey = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections", true))
+                    {
+                        if (connKey != null)
+                        {
+                            foreach (string val in connKey.GetValueNames())
+                                connKey.DeleteValue(val, false);
+                        }
+                    }
+                } catch { }
+
                 // Anında etki etmesi için Windows'u uyar
                 InternetSetOption(IntPtr.Zero, INTERNET_OPTION_SETTINGS_CHANGED, IntPtr.Zero, 0);
                 InternetSetOption(IntPtr.Zero, INTERNET_OPTION_REFRESH, IntPtr.Zero, 0);
-                Console.WriteLine("[PROXY] Sistem Proxy Kapatıldı.");
+                Console.WriteLine("[PROXY] Sistem Proxy ve Bağlantı Kalıntıları Kapatıldı.");
             }
             catch (Exception ex) { Console.WriteLine("Proxy kapatılamadı: " + ex.Message); }
         }

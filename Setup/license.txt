@@ -1,0 +1,55 @@
+TRUVA VPN & KAZIK SAVAR KULLANICI SÖZLEŞMESİ, GİZLİLİK POLİTİKASI VE SORUMLULUK REDDİ
+Son Güncelleme: 03.04.2026
+Sürüm: 1.0.0 (Nihai)
+
+1. TARAFLAR VE SÖZLEŞMENİN KABULÜ
+İşbu sözleşme, Truva VPN (Masaüstü/Mobil) ve Kazık Savar yazılımlarını (bundan sonra "Uygulama" veya "Yazılım" olarak anılacaktır) kullanan gerçek kişiler ("Kullanıcı") ile Uygulama geliştiricisi ("Geliştirici") arasında akdedilmiştir. Kullanıcı, Yazılımı cihaza indirdiği, kurduğu veya "Kabul Ediyorum" butonuna bastığı anda bu sözleşmeyi tüm maddeleriyle, hiçbir istisna olmaksızın kabul etmiş sayılır.
+
+2. HİZMETİN NİTELİĞİ (ÜÇÜNCÜ TARAF SUNUCU RİSKİ)
+Sunucu Kaynağı: Truva VPN, kendi VPN sunucu altyapısını işletmez. Uygulama, internet üzerindeki açık kaynaklardan taranarak (scraped) elde edilen, üçüncü taraflara ait ücretsiz sunuculara bağlantı sağlayan teknik bir arayüzdür.
+
+Güvenlik ve Log Politikası: Bağlanılan sunucular Geliştiricinin denetiminde değildir. Bu sunucuların sahiplerinin veri kayıt (log) tutma politikaları bilinmemektedir.
+
+Kritik Uyarı: Kullanıcının bu sunucular üzerinden bankacılık işlemleri yapması, kredi kartı bilgisi girmesi veya hassas kişisel verilerini paylaşması kesinlikle önerilmez. Oluşabilecek veri sızıntılarından veya kimlik hırsızlıklarından münhasıran Kullanıcı sorumludur.
+
+3. GİZLİLİK VE VERİ İŞLEME (KVKK/GDPR UYUMU)
+Kişisel Veriler: Uygulama, kullanıcıların internet trafik verilerini veya gerçek IP adreslerini kendi sunucularında kayıt altına almaz.
+
+Üçüncü Taraf Servisler: Hizmetin sürekliliği, anahtar (key) doğrulaması ve reklam gösterimi için Google Firebase ve AdMob servisleri kullanılmaktadır. Kullanıcı; anonim cihaz kimliği, işletim sistemi sürümü ve uygulama kullanım istatistiklerinin bu platformlar aracılığıyla işlenmesini kabul eder.
+
+4. RESMİ OLMAYAN DAĞITIM KANALLARI
+Uygulamanın resmi web sitesi (truvavpn.com) veya resmi GitHub sayfası dışındaki kaynaklardan (3. taraf APK siteleri, dosya paylaşım platformları vb.) temin edilmesi durumunda oluşabilecek;
+
+Modifiye edilmiş kodlardan kaynaklı güvenlik açıkları,
+
+Zararlı yazılım (malware/virus) bulaşması,
+durumlarında Geliştirici hiçbir hukuki veya teknik sorumluluk kabul etmez.
+
+5. KULLANIM KISITLAMALARI VE HUKUKİ SORUMLULUK
+Kullanıcı, Uygulamayı kullanarak yerel (T.C. kanunları dahil) ve uluslararası yasaları ihlal etmeyeceğini taahhüt eder. Aşağıdaki eylemlerin gerçekleştirilmesi durumunda tüm hukuki ve cezai sorumluluk Kullanıcıya aittir:
+
+Siber saldırılar (DDoS, hacking), ağ tarama faaliyetleri ve spam e-posta gönderimi.
+
+Telif haklarına aykırı içeriklerin yasa dışı dağıtımı (Torrent vb.).
+
+Çocuk istismarı, terör propagandası veya yasal olmayan diğer içeriklere erişim.
+
+Geliştirici, Uygulamanın kullanım amacının "yasaklı sitelere erişim" olmadığını, sadece "anonim ve güvenli internet deneyimi" olduğunu beyan eder.
+
+6. REKLAM VE ANAHTAR (KEY) MODELİ
+Uygulama erişimi, Kazık Savar uygulaması üzerinden reklam izleme karşılığı üretilen 3 saatlik geçici anahtarlar ile sağlanır.
+
+Reklam içerikleri Google AdMob tarafından sağlanır; Geliştirici reklam içeriğinden sorumlu tutulamaz.
+
+Anahtar sisteminin teknik arızalar nedeniyle çalışmaması durumunda Geliştiricinin bir tazminat yükümlülüğü yoktur.
+
+7. GARANTİ REDDİ VE SORUMLULUK SINIRLANDIRMASI
+Hizmet Kalitesi: Yazılım "Olduğu Gibi" (As-Is) sunulmaktadır. Geliştirici; sunucu hızı, ping değerleri veya bağlantı sürekliliği konusunda garanti vermez.
+
+Zarar Tazmini: Kullanım sonucu oluşabilecek donanımsal arızalar, veri kayıpları veya İnternet Servis Sağlayıcı (ISS) tarafından uygulanabilecek yaptırımlardan Geliştirici sorumlu değildir.
+
+8. FİKRİ MÜLKİYET VE TERSİNE MÜHENDİSLİK
+Yazılımın kaynak kodları, görsel tasarımı ve markası Geliştiriciye aittir. Yazılımın tersine mühendislik (reverse engineering) yoluyla çözülmesi, kırılarak (crack) anahtar sisteminin bypass edilmesi veya izinsiz yeniden dağıtılması yasaktır.
+
+9. YETKİLİ MAHKEME VE YÜRÜRLÜK
+İşbu sözleşmeden doğacak tüm ihtilaflarda İstanbul (Çağlayan) Mahkemeleri ve İcra Daireleri yetkilidir. Sözleşme, Kullanıcı Yazılımı cihazından kaldırana kadar geçerliliğini korur.

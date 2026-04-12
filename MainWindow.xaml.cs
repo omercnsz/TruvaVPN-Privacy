@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Windows.Controls;
 using TruvaDesktop.Core;
+using TruvaDesktop.Models;
 using System.Diagnostics;
 
 namespace TruvaDesktop
@@ -14,18 +15,26 @@ namespace TruvaDesktop
     public partial class MainWindow : Window
     {
         private bool isConnected;
+        private bool isNitroActive;
+        private bool _isClosing;
         private readonly Core.ApiManager _apiManager;
         private readonly Core.VpnService _vpnService;
+        private readonly Core.UpdateManager _updateManager;
         private readonly List<Core.Server> _allServersCache = [];
         private readonly System.Windows.Threading.DispatcherTimer _timer;
+        private readonly Core.SessionManager _sessionManager;
         private DateTime _startTime;
+        private string _currentLang = "tr-TR";
 
         public MainWindow()
         {
             InitializeComponent();
+            ApplyLanguage(_currentLang);
+            
             _apiManager = new Core.ApiManager();
             _vpnService = new Core.VpnService();
-            InitializeStore();
+            lstNitroApps.ItemsSource = _vpnService.NitroService.Apps;
+
 
             _timer = new System.Windows.Threading.DispatcherTimer
             {
@@ -34,15 +43,39 @@ namespace TruvaDesktop
             _timer.Tick += Timer_Tick;
 
             Spoofing.RegistryManager.InitializeFailsafe();
-            LoadApps(); 
+            LoadApps();
             _ = LoadServersAsync();
 
-            this.Closing += (s, e) => 
+            _sessionManager = new Core.SessionManager();
+            _updateManager = new Core.UpdateManager();
+
+            // Önce güncelleme kontrolü yap, sonra kilit ekranına geç
+            _ = CheckForUpdatesAsync();
+            
+            // Oturum kontrolü için her saniye çalışan timer'ı başlat (bağlantıdan bağımsız)
+            if (!_timer.IsEnabled) _timer.Start();
+
+
+
+            this.Closing += async (s, e) => 
             {
-                if (isConnected) _vpnService.Disconnect();
-                Spoofing.RegistryManager.RestoreOriginalSettings();
-                Spoofing.BrowserPolicyManager.DisablePolicies();
-                Spoofing.ProxyManager.DisableSystemProxy();
+                if (_isClosing) return;
+                
+                e.Cancel = true; 
+                _isClosing = true;
+
+                // Görsel Bildirim
+                txtStatus.Text = "TEMİZLENİYOR... (TARAYICINIZI TAMAMEN KAPATIN)";
+                txtStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF8C00")); // Dark Orange
+
+                // Arka planda temizliği başlat
+                await Task.Run(() => _vpnService.Disconnect());
+                
+                // Kullanıcının görmesi ve işlemlerin tamamlanması için kısa bir bekleme
+                await Task.Delay(800);
+
+                // Uygulamayı tamamen kapat
+                Application.Current.Shutdown();
             };
 
             _vpnService.StatusChanged += (status) => 
@@ -54,7 +87,8 @@ namespace TruvaDesktop
                     if (cleanStatus.StartsWith("[KOPARILDI]")) 
                     {
                         isConnected = false;
-                        _timer.Stop();
+                        isNitroActive = false;
+                        // Timer'ı durdurma, oturum kontrolü devam etsin
                         ResetUIState();
                     }
 
@@ -76,43 +110,179 @@ namespace TruvaDesktop
             };
         }
 
-        private bool _isPremium;
-
-        private async void InitializeStore()
+        private void ApplyLanguage(string langCode)
         {
             try
             {
-                _isPremium = await StoreManager.Instance.IsUserSubscribedAsync();
-                UpdatePremiumUi();
+                var dict = new ResourceDictionary();
+                dict.Source = new Uri($"Resources/Strings.{langCode}.xaml", UriKind.Relative);
+
+                Application.Current.Resources.MergedDictionaries.Clear();
+                Application.Current.Resources.MergedDictionaries.Add(dict);
+                _currentLang = langCode;
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[STORE] Init hatası: {ex.Message}");
+                Debug.WriteLine($"[LANG] Hata: {ex.Message}");
             }
         }
 
-        private void UpdatePremiumUi()
+        private void BtnLang_Click(object sender, RoutedEventArgs e)
         {
-            Dispatcher.Invoke(() =>
-            {
-                btnPremium.Visibility = _isPremium ? Visibility.Collapsed : Visibility.Visible;
-                badgePremium.Visibility = _isPremium ? Visibility.Visible : Visibility.Collapsed;
-                premiumLockOverlay.Visibility = _isPremium ? Visibility.Collapsed : Visibility.Visible;
-                
-                if (_isPremium)
-                {
-                    txtStatus.Text = "PREMIUM AKTİF - Sınırsız Erişim";
-                }
-            });
+            string newLang = _currentLang == "tr-TR" ? "en-US" : "tr-TR";
+            ApplyLanguage(newLang);
         }
+
+
 
         [System.Text.RegularExpressions.GeneratedRegex(@"\x1B\[[^m]*m")]
         private static partial System.Text.RegularExpressions.Regex AnsiRegex();
 
         private void Timer_Tick(object? sender, EventArgs e)
         {
-            var duration = DateTime.Now - _startTime;
-            txtTimer.Text = duration.ToString(@"hh\:mm\:ss");
+            try
+            {
+                // VPN Bağlantı Süresi
+                if (isConnected || isNitroActive)
+                {
+                    var duration = DateTime.Now - _startTime;
+                    txtTimer.Text = duration.ToString(@"hh\:mm\:ss");
+                }
+
+                // Oturum Kontrolü (3 Saat Limiti)
+                if (_sessionManager == null) return;
+
+                if (_sessionManager.IsSessionActive)
+                {
+                    if (lockOverlay.Visibility == Visibility.Visible)
+                        lockOverlay.Visibility = Visibility.Collapsed;
+
+                    lblSessionInfo.Visibility = Visibility.Visible;
+                    txtSessionRemaining.Visibility = Visibility.Visible;
+                    
+                    var remaining = _sessionManager.RemainingTime;
+                    txtSessionRemaining.Text = remaining.ToString(@"hh\:mm\:ss");
+
+                    // Son 1 dakika uyarısı
+                    if (remaining.TotalSeconds < 60)
+                        txtSessionRemaining.Foreground = Brushes.Red;
+                    else
+                        txtSessionRemaining.Foreground = Brushes.White;
+                }
+                else
+                {
+                    // OTURUM BİTTİ: HEMEN KİLİTLE
+                    if (lockOverlay.Visibility != Visibility.Visible)
+                    {
+                        lockOverlay.Visibility = Visibility.Visible;
+                        lblSessionInfo.Visibility = Visibility.Collapsed;
+                        txtSessionRemaining.Visibility = Visibility.Collapsed;
+                        
+                        // Arka planda tüm bağlantıları zorla kes
+                        _ = Task.Run(() => {
+                            Dispatcher.Invoke(() => {
+                                Disconnect();
+                                MessageBox.Show((string)Application.Current.Resources["LockSessionExpired"], (string)Application.Current.Resources["LockTitle"], MessageBoxButton.OK, MessageBoxImage.Warning);
+                            });
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[TIMER] Hata: {ex.Message}");
+            }
+        }
+
+        private void CheckSessionState()
+        {
+            if (_sessionManager.IsSessionActive)
+            {
+                lockOverlay.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                lockOverlay.Visibility = Visibility.Visible;
+            }
+        }
+
+        private async void BtnUnlock_Click(object sender, RoutedEventArgs e)
+        {
+            string code = txtAccessCode.Text.Trim();
+            if (string.IsNullOrEmpty(code)) return;
+
+            btnUnlock.IsEnabled = false;
+            txtLockStatus.Text = (string)Application.Current.Resources["LockStatusValidating"];
+            txtLockStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#00E5FF"));
+
+            var result = await _sessionManager.ValidateCodeAsync(code);
+
+            if (result.success)
+            {
+                txtLockStatus.Text = result.message;
+                txtLockStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#198754"));
+                
+                await Task.Delay(1500); // Başarı mesajını görsün
+                
+                txtAccessCode.Clear();
+                txtLockStatus.Text = "";
+                CheckSessionState();
+            }
+            else
+            {
+                txtLockStatus.Text = result.message;
+                txtLockStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545"));
+            }
+
+            btnUnlock.IsEnabled = true;
+        }
+
+        private void BtnGetCode_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string url = "https://play.google.com/store/apps/details?id=com.kaziksavar.app";
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Uygulama başlatılamadı: " + ex.Message);
+            }
+        }
+
+        private void TxtAccessCode_GotFocus(object sender, RoutedEventArgs e)
+        {
+            txtAccessCode.SelectAll();
+        }
+
+        private async void BtnAddTime_Click(object sender, RoutedEventArgs e)
+        {
+            string code = txtAddCode.Text.Trim();
+            if (string.IsNullOrEmpty(code)) return;
+
+            btnAddTime.IsEnabled = false;
+            string originalText = btnAddTime.Content.ToString() ?? "";
+            btnAddTime.Content = "...";
+
+            var result = await _sessionManager.ValidateCodeAsync(code);
+
+            if (result.success)
+            {
+                txtAddCode.Clear();
+                MessageBox.Show("Süreniz başarıyla 3 saat uzatıldı!", "Başarılı", MessageBoxButton.OK, MessageBoxImage.Information);
+                CheckSessionState();
+            }
+            else
+            {
+                MessageBox.Show(result.message, "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            btnAddTime.IsEnabled = true;
+            btnAddTime.Content = originalText;
         }
 
         private void Nav_Click(object sender, RoutedEventArgs e)
@@ -122,10 +292,14 @@ namespace TruvaDesktop
                 paneConn.Visibility = Visibility.Collapsed;
                 paneApps.Visibility = Visibility.Collapsed;
                 paneSafety.Visibility = Visibility.Collapsed;
+                paneNitro.Visibility = Visibility.Collapsed;
+                paneGame.Visibility = Visibility.Collapsed;
 
                 if (rb.Name == "navConn") paneConn.Visibility = Visibility.Visible;
                 else if (rb.Name == "navApps") paneApps.Visibility = Visibility.Visible;
                 else if (rb.Name == "navSafety") paneSafety.Visibility = Visibility.Visible;
+                else if (rb.Name == "navNitro") paneNitro.Visibility = Visibility.Visible;
+                else if (rb.Name == "navGame") paneGame.Visibility = Visibility.Visible;
             }
         }
 
@@ -138,22 +312,31 @@ namespace TruvaDesktop
 
             btnConnectApp.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#00D2FF"));
             btnConnectApp.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#121420"));
-            txtBtnAppText.Text = "UYG. İLE BAĞLA";
+            txtBtnAppText.Text = (string)Application.Current.Resources["BtnConnectAppAction"];
             btnConnectApp.IsEnabled = true;
+            lstApps.IsEnabled = true;
+            btnBrowseApp.IsEnabled = true;
+            btnRemoveApp.IsEnabled = true;
+            btnClearApps.IsEnabled = true;
 
+            btnConnectNitro.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6F42C1"));
+            txtBtnNitroText.Text = (string)Application.Current.Resources["BtnNitroStart"];
+            btnConnectNitro.IsEnabled = true;
+            lstNitroApps.IsEnabled = true;
+            btnBrowseNitroApp.IsEnabled = true;
+            btnRemoveNitroApp.IsEnabled = true;
+            
+            // Re-enable server selection and settings
             cmbServers.IsEnabled = true;
             cmbServersApps.IsEnabled = true;
             toggleGameMode.IsEnabled = true;
             toggleSpoofing.IsEnabled = true;
             cmbSpoofingCountry.IsEnabled = true;
-            lstApps.IsEnabled = true;
-            btnBrowseApp.IsEnabled = true;
-            btnClearApps.IsEnabled = true;
-            
+
             txtStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#00E5FF"));
             txtStatus.Text = "Bağlantı Bekleniyor";
             txtTimer.Text = "00:00:00";
-            _timer.Stop();
+            // _timer.Stop(); // Oturum kontrolü için çalışmaya devam etmeli
         }
 
         private void CmbServers_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -242,7 +425,21 @@ namespace TruvaDesktop
         
         private void LstApps_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Delete && lstApps.SelectedIndex != -1)
+            if (e.Key == Key.Delete)
+            {
+                BtnRemoveApp_Click(sender, e);
+            }
+        }
+
+        private void BtnClearApps_Click(object sender, RoutedEventArgs e)
+        {
+            lstApps.Items.Clear();
+            SaveApps();
+        }
+
+        private void BtnRemoveApp_Click(object sender, RoutedEventArgs e)
+        {
+            if (lstApps.SelectedIndex != -1)
             {
                 var selectedItems = lstApps.SelectedItems.Cast<string>().ToList();
                 foreach (var item in selectedItems)
@@ -253,10 +450,32 @@ namespace TruvaDesktop
             }
         }
 
-        private void BtnClearApps_Click(object sender, RoutedEventArgs e)
+
+
+        private void BtnBrowseNitroApp_Click(object sender, RoutedEventArgs e)
         {
-            lstApps.Items.Clear();
-            SaveApps();
+            var picker = new AppPickerWindow();
+            picker.Owner = this;
+            if (picker.ShowDialog() == true && picker.SelectedApp != null)
+            {
+                var newApp = new NitroApp { Name = picker.SelectedApp.Name, ExeName = picker.SelectedApp.ExeName };
+                if (!_vpnService.NitroService.Apps.Contains(newApp))
+                {
+                    _vpnService.NitroService.Apps.Add(newApp);
+                }
+            }
+        }
+
+        private void BtnRemoveNitroApp_Click(object sender, RoutedEventArgs e)
+        {
+            if (lstNitroApps.SelectedIndex != -1)
+            {
+                var selectedItems = lstNitroApps.SelectedItems.Cast<NitroApp>().ToList();
+                foreach (var item in selectedItems)
+                {
+                    _vpnService.NitroService.Apps.Remove(item);
+                }
+            }
         }
 
         private void SaveApps()
@@ -264,7 +483,8 @@ namespace TruvaDesktop
             try
             {
                 var apps = lstApps.Items.Cast<string>().ToList();
-                System.IO.File.WriteAllLines("apps.txt", apps);
+                string path = System.IO.Path.Combine(AppContext.BaseDirectory, "apps.txt");
+                System.IO.File.WriteAllLines(path, apps);
             }
             catch { }
         }
@@ -273,9 +493,10 @@ namespace TruvaDesktop
         {
             try
             {
-                if (System.IO.File.Exists("apps.txt"))
+                string path = System.IO.Path.Combine(AppContext.BaseDirectory, "apps.txt");
+                if (System.IO.File.Exists(path))
                 {
-                    var apps = System.IO.File.ReadAllLines("apps.txt");
+                    var apps = System.IO.File.ReadAllLines(path);
                     foreach (var app in apps)
                     {
                         if (!string.IsNullOrWhiteSpace(app) && !lstApps.Items.Contains(app))
@@ -362,21 +583,6 @@ namespace TruvaDesktop
             {
                 if (activeCombo.SelectedItem is not Core.Server selectedServer) return;
 
-                // Premium Kontrolü
-                if (selectedServer.IsPremium && !_isPremium)
-                {
-                    MessageBoxResult res = MessageBox.Show(
-                        $"{selectedServer.CountryName} sunucusu sadece Premium üyeler içindir.\n\nPremium'a geçerek yüksek hızlı sunuculara erişmek ister misiniz?", 
-                        "Truva VPN Premium", 
-                        MessageBoxButton.YesNo, 
-                        MessageBoxImage.Information);
-
-                    if (res == MessageBoxResult.Yes)
-                    {
-                        BtnPremium_Click(null!, null!);
-                    }
-                    return;
-                }
                 
                 if (toggleSpoofing.IsChecked == true && cmbSpoofingCountry.SelectedItem is Models.Country spoofCountry)
                 {
@@ -422,6 +628,7 @@ namespace TruvaDesktop
                 txtStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#198754"));
                 
                 cmbServers.IsEnabled = false;
+                cmbServersApps.IsEnabled = false;
                 toggleGameMode.IsEnabled = false;
                 toggleSpoofing.IsEnabled = false;
                 cmbSpoofingCountry.IsEnabled = false;
@@ -437,39 +644,184 @@ namespace TruvaDesktop
 
         private void Disconnect()
         {
-            _timer.Stop();
+            // _timer.Stop(); // Oturum varken timer durmamalı
+            isConnected = false;
+            isNitroActive = false;
+            
             _vpnService.Disconnect();
+            
+            // Failsafe: VPN servisinin içinde olmayan manuel temizlikleri de yap
             Spoofing.RegistryManager.RestoreOriginalSettings();
             Spoofing.BrowserPolicyManager.DisablePolicies();
             Spoofing.ProxyManager.DisableSystemProxy();
-            isConnected = false;
+            Spoofing.DnsManager.ResetToDhcp();
+            
             ResetUIState();
         }
 
-        private async void BtnPremium_Click(object sender, RoutedEventArgs e)
+        private void BtnConnectNitro_Click(object sender, RoutedEventArgs e)
+        {
+            if (!isNitroActive)
+            {
+                // Nitro Geçit Hattı Başlat
+                _vpnService.ConnectNitro();
+                
+                isNitroActive = true;
+                isConnected = false;
+
+                txtStatus.Text = (string)Application.Current.Resources["NitroStatusActive"];
+                txtStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6F42C1"));
+
+                btnConnectNitro.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#198754"));
+                txtBtnNitroText.Text = (string)Application.Current.Resources["BtnNitroStop"];
+
+                btnConnectSystem.IsEnabled = false;
+                btnConnectApp.IsEnabled = false;
+                
+                lstNitroApps.IsEnabled = false;
+                btnBrowseNitroApp.IsEnabled = false;
+                btnRemoveNitroApp.IsEnabled = false;
+            }
+            else
+            {
+                Disconnect();
+            }
+        }
+
+        private void BtnConnectGame_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                var windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(this);
-                var status = await StoreManager.Instance.PurchaseSubscriptionAsync(windowHandle);
-
-                if (status is Windows.Services.Store.StorePurchaseStatus.Succeeded)
+                var gameMode = GameMode.GameModeManager.Instance;
+                if (!gameMode.IsRunning)
                 {
-                    _isPremium = true;
-                    UpdatePremiumUi();
-                    MessageBox.Show("Truva Premium üyeliğiniz aktif edildi!", "Tebrikler!", MessageBoxButton.OK, MessageBoxImage.Information);
+                    gameMode.Start();
+                    btnConnectGame.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#198754"));
+                    txtBtnGameText.Text = "OYUN MODUNU DURDUR";
+                    txtStatus.Text = "🎮 Oyun Modu Aktif (IP Fragmented)";
+                    txtStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF3D00"));
                 }
-                else if (status is Windows.Services.Store.StorePurchaseStatus.AlreadyPurchased)
+                else
                 {
-                    _isPremium = true;
-                    UpdatePremiumUi();
-                    MessageBox.Show("Zaten aktif bir aboneliğiniz bulunuyor.", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
+                    gameMode.Stop();
+                    btnConnectGame.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF3D00"));
+                    txtBtnGameText.Text = "OYUN MODUNU BAŞLAT";
+                    txtStatus.Text = isConnected ? "🛡️ Sistem Korunuyor" : "Bağlantı Bekleniyor";
+                    txtStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#00E5FF"));
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Satın alma işlemi başlatılamadı: {ex.Message}\n\nLütfen Microsoft Store üzerinden uygulamanın lisanslı olduğunu kontrol edin.", "Mağaza Hatası", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Oyun Modu Başlatılamadı:\n" + ex.Message, "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        // ======== GÜNCELLEME SİSTEMİ ========
+
+        private async Task CheckForUpdatesAsync()
+        {
+            try
+            {
+                // Güncelleme overlay'ini göster
+                updateOverlay.Visibility = Visibility.Visible;
+                txtUpdateStatus.Text = "Güncelleme kontrol ediliyor...";
+                txtUpdateVersion.Text = $"Mevcut sürüm: {Core.UpdateManager.GetCurrentVersion()}";
+                updateProgressFill.Width = 0;
+                btnSkipUpdate.Visibility = Visibility.Collapsed;
+
+                // GitHub'dan versiyon bilgisini çek
+                var updateInfo = await _updateManager.CheckForUpdateAsync();
+
+                if (updateInfo == null)
+                {
+                    // İnternet yok veya hata — güncelleme atla
+                    txtUpdateStatus.Text = "Güncelleme kontrolü başarısız, devam ediliyor...";
+                    txtUpdateStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFC107"));
+                    btnSkipUpdate.Visibility = Visibility.Visible;
+                    await Task.Delay(2000);
+                    SkipUpdate();
+                    return;
+                }
+
+                if (_updateManager.IsUpdateRequired(updateInfo))
+                {
+                    // Güncelleme gerekli!
+                    txtUpdateVersion.Text = $"Mevcut: {Core.UpdateManager.GetCurrentVersion()} → Yeni: {updateInfo.Version}";
+                    txtUpdateStatus.Text = "Yeni sürüm bulundu! İndirme başlıyor...";
+                    txtUpdateStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#198754"));
+
+                    if (!string.IsNullOrEmpty(updateInfo.ReleaseNotes))
+                    {
+                        txtReleaseNotes.Text = updateInfo.ReleaseNotes;
+                        txtReleaseNotes.Visibility = Visibility.Visible;
+                    }
+
+                    // Event handler'ları bağla
+                    _updateManager.StatusChanged += (status) =>
+                    {
+                        Dispatcher.Invoke(() => txtUpdateStatus.Text = status);
+                    };
+
+                    _updateManager.ProgressChanged += (percent) =>
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            // Progress bar genişliğini hesapla (parent border ~420px usable width)
+                            double maxWidth = 420;
+                            updateProgressFill.Width = (percent / 100.0) * maxWidth;
+                            txtUpdatePercent.Text = $"%{percent}";
+                        });
+                    };
+
+                    // İndirme ve yükleme
+                    bool success = await _updateManager.DownloadAndInstallAsync(updateInfo);
+
+                    if (success)
+                    {
+                        txtUpdateStatus.Text = "Yükleme başlatıldı! Uygulama kapanıyor...";
+                        txtUpdateStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#198754"));
+                        await Task.Delay(2000);
+                        Application.Current.Shutdown();
+                        return;
+                    }
+                    else
+                    {
+                        // İndirme başarısız
+                        txtUpdateStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545"));
+                        btnSkipUpdate.Visibility = Visibility.Visible;
+                        btnSkipUpdate.Content = "Güncelleme Atla";
+                    }
+                }
+                else
+                {
+                    // Uygulama güncel
+                    txtUpdateStatus.Text = "✓ Uygulama güncel!";
+                    txtUpdateStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#198754"));
+                    await Task.Delay(1200);
+                    SkipUpdate();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[UPDATE-UI] Hata: {ex.Message}");
+                txtUpdateStatus.Text = "Güncelleme kontrolü başarısız.";
+                txtUpdateStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFC107"));
+                btnSkipUpdate.Visibility = Visibility.Visible;
+                await Task.Delay(2000);
+                SkipUpdate();
+            }
+        }
+
+        private void SkipUpdate()
+        {
+            updateOverlay.Visibility = Visibility.Collapsed;
+            CheckSessionState();
+        }
+
+        private void BtnSkipUpdate_Click(object sender, RoutedEventArgs e)
+        {
+            SkipUpdate();
+        }
+
     }
 }

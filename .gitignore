@@ -12,3 +12,22 @@ MSIX_Build/
 *.user
 *.suo
 *.sln.docstates
+
+# Release artifacts
+publish/
+publish_*/
+Setup/Output/
+*.exe
+*.dll
+*.sys
+!Nitro/
+!Resources/
+!GameMode/
+!Models/
+obfuscar.xml
+obfuscar_deploy.xml
+publish_raw/
+publish_new/
+publish_v*/
+remotes.txt
+version.json.template

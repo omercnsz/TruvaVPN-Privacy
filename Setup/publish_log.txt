@@ -1,0 +1,6 @@
+  Geri yüklenecek projeler belirleniyor...
+C:\Users\User\Desktop\TruvaDesktop\TruvaDesktop\TruvaDesktop.csproj : warning NU1510: PackageReference System.Drawing.Common ayıklanmayacak. Bu paketi bağımlılıklarınızdan kaldırmayı düşünün, çünkü muhtemelen gereksizdir.
+  C:\Users\User\Desktop\TruvaDesktop\TruvaDesktop\TruvaDesktop.csproj geri yüklendi (252 ms içinde).
+C:\Users\User\Desktop\TruvaDesktop\TruvaDesktop\TruvaDesktop.csproj : warning NU1510: PackageReference System.Drawing.Common ayıklanmayacak. Bu paketi bağımlılıklarınızdan kaldırmayı düşünün, çünkü muhtemelen gereksizdir.
+  TruvaDesktop -> C:\Users\User\Desktop\TruvaDesktop\TruvaDesktop\bin\Release\net10.0-windows10.0.19041.0\win-x64\TruvaDesktop.dll
+  TruvaDesktop -> C:\Users\User\Desktop\TruvaDesktop\TruvaDesktop\publish\

@@ -1,0 +1,63 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Nav Bar -->
+    <System:String x:Key="NavConnection" xmlns:System="clr-namespace:System;assembly=mscorlib">CONNECTION</System:String>
+    <System:String x:Key="NavGame" xmlns:System="clr-namespace:System;assembly=mscorlib">GAME MODE</System:String>
+    <System:String x:Key="NavApps" xmlns:System="clr-namespace:System;assembly=mscorlib">APPLICATIONS</System:String>
+    <System:String x:Key="NavSafety" xmlns:System="clr-namespace:System;assembly=mscorlib">SECURITY</System:String>
+    <System:String x:Key="NavNitro" xmlns:System="clr-namespace:System;assembly=mscorlib">NITRO GATEWAY</System:String>
+
+
+    <!-- Connection Tab -->
+    <System:String x:Key="TitleSystemConn" xmlns:System="clr-namespace:System;assembly=mscorlib">System-Wide Connection</System:String>
+    <System:String x:Key="DescSystemConn" xmlns:System="clr-namespace:System;assembly=mscorlib">Provides full protection by routing all device traffic through VPN.</System:String>
+    <System:String x:Key="HeaderServerSelect" xmlns:System="clr-namespace:System;assembly=mscorlib">Server Selection</System:String>
+    <System:String x:Key="CheckGameMode" xmlns:System="clr-namespace:System;assembly=mscorlib">🕹️ Gaming Servers Only (UDP)</System:String>
+    <System:String x:Key="BtnConnectAction" xmlns:System="clr-namespace:System;assembly=mscorlib">CONNECT SYSTEM</System:String>
+    <System:String x:Key="BtnDisconnectAction" xmlns:System="clr-namespace:System;assembly=mscorlib">DISCONNECT</System:String>
+    <System:String x:Key="FooterConnInfo" xmlns:System="clr-namespace:System;assembly=mscorlib">All traffic passes through VPN.</System:String>
+
+    <!-- Apps Tab -->
+    <System:String x:Key="TitleAppConn" xmlns:System="clr-namespace:System;assembly=mscorlib">App Tunneling</System:String>
+    <System:String x:Key="DescAppConn" xmlns:System="clr-namespace:System;assembly=mscorlib">Only selected applications will access the internet via VPN.</System:String>
+    <System:String x:Key="HeaderAppList" xmlns:System="clr-namespace:System;assembly=mscorlib">Apps Added to VPN List</System:String>
+    <System:String x:Key="BtnClearList" xmlns:System="clr-namespace:System;assembly=mscorlib">Clear All</System:String>
+    <System:String x:Key="BtnRemoveSelected" xmlns:System="clr-namespace:System;assembly=mscorlib">Remove Selected</System:String>
+    <System:String x:Key="BtnAddApp" xmlns:System="clr-namespace:System;assembly=mscorlib">+ Add Application</System:String>
+    <System:String x:Key="HeaderAppServer" xmlns:System="clr-namespace:System;assembly=mscorlib">Select Server for Apps</System:String>
+    <System:String x:Key="BtnConnectAppAction" xmlns:System="clr-namespace:System;assembly=mscorlib">CONNECT WITH APPS</System:String>
+    <System:String x:Key="FooterAppInfo" xmlns:System="clr-namespace:System;assembly=mscorlib">Only selected applications are affected.</System:String>
+
+    <!-- Safety Tab -->
+    <System:String x:Key="TitleSafety" xmlns:System="clr-namespace:System;assembly=mscorlib">Digital Identity Protection</System:String>
+    <System:String x:Key="DescSafety" xmlns:System="clr-namespace:System;assembly=mscorlib">Hide your computer's region, time, and hardware identity.</System:String>
+    <System:String x:Key="CheckToggleSpoofing" xmlns:System="clr-namespace:System;assembly=mscorlib">🛡️ Activate Identity Spoofing</System:String>
+    <System:String x:Key="HeaderSpoofRegion" xmlns:System="clr-namespace:System;assembly=mscorlib">Target Spoof Region</System:String>
+
+
+
+    <!-- Status Bar -->
+    <System:String x:Key="StatusDisconnected" xmlns:System="clr-namespace:System;assembly=mscorlib">Disconnected</System:String>
+    <System:String x:Key="StatusConnecting" xmlns:System="clr-namespace:System;assembly=mscorlib">Connecting...</System:String>
+    <System:String x:Key="StatusUpdating" xmlns:System="clr-namespace:System;assembly=mscorlib">Updating Servers...</System:String>
+    <System:String x:Key="StatusConnected" xmlns:System="clr-namespace:System;assembly=mscorlib">YOU ARE PROTECTED</System:String>
+    <System:String x:Key="StatusSelectServer" xmlns:System="clr-namespace:System;assembly=mscorlib">Select a Server</System:String>
+    <System:String x:Key="LabelVpnStatus" xmlns:System="clr-namespace:System;assembly=mscorlib">VPN STATUS</System:String>
+
+    <!-- Lock Screen -->
+    <System:String x:Key="LockTitle" xmlns:System="clr-namespace:System;assembly=mscorlib">SESSION EXPIRED</System:String>
+    <System:String x:Key="LockDesc" xmlns:System="clr-namespace:System;assembly=mscorlib">Enter the 6-digit access code to continue. Use 'Kazık Savar' app to get a new code.</System:String>
+    <System:String x:Key="LockPlaceholder" xmlns:System="clr-namespace:System;assembly=mscorlib">6-Digit Code</System:String>
+    <System:String x:Key="LockBtnUnlock" xmlns:System="clr-namespace:System;assembly=mscorlib">VALIDATE ACCESS</System:String>
+    <System:String x:Key="LockBtnGetCode" xmlns:System="clr-namespace:System;assembly=mscorlib">GET NEW CODE (KAZIK SAVAR)</System:String>
+    <System:String x:Key="LockStatusValidating" xmlns:System="clr-namespace:System;assembly=mscorlib">Validating Code...</System:String>
+    <System:String x:Key="LockSessionInfo" xmlns:System="clr-namespace:System;assembly=mscorlib">SESSION TIME REMAINING</System:String>
+    <System:String x:Key="LockSessionExpired" xmlns:System="clr-namespace:System;assembly=mscorlib">Session Expired! New Code Required to Reconnect.</System:String>
+
+    <System:String x:Key="TitleNitro" xmlns:System="clr-namespace:System;assembly=mscorlib">Nitro Gateway</System:String>
+    <System:String x:Key="DescNitro" xmlns:System="clr-namespace:System;assembly=mscorlib"></System:String>
+    <System:String x:Key="HeaderNitroAppList" xmlns:System="clr-namespace:System;assembly=mscorlib">Nitro Application List</System:String>
+    <System:String x:Key="BtnNitroStart" xmlns:System="clr-namespace:System;assembly=mscorlib">START NITRO</System:String>
+    <System:String x:Key="BtnNitroStop" xmlns:System="clr-namespace:System;assembly=mscorlib">STOP NITRO</System:String>
+    <System:String x:Key="NitroStatusActive" xmlns:System="clr-namespace:System;assembly=mscorlib">🚀 Nitro Active - High-Speed Access Enabled</System:String>
+</ResourceDictionary>

@@ -64,30 +64,38 @@ namespace TruvaDesktop.Spoofing
             }
         }
 
+        [System.Runtime.InteropServices.DllImport("wininet.dll")]
+        private static extern bool InternetSetOption(IntPtr hInternet, int dwOption, IntPtr lpBuffer, int dwBufferLength);
+
         private static void RemoveFromBrowser(string basePath)
         {
-            using (RegistryKey? key = Registry.CurrentUser.OpenSubKey(basePath, true))
+            foreach (var hive in new[] { Registry.CurrentUser, Registry.LocalMachine })
             {
-                if (key != null)
+                try
                 {
-                    key.DeleteValue("ProxySettings", false);
-                    key.DeleteValue("ProxyMode", false);
-                    key.DeleteValue("ProxyServer", false);
-                    key.DeleteValue("WebRtcIPHandlingPolicy", false);
-                    key.DeleteValue("DnsOverHttpsMode", false);
+                    using (RegistryKey? key = hive.OpenSubKey(basePath, true))
+                    {
+                        if (key != null)
+                        {
+                            // Tüm olası proxy ve DNS politikalarını temizle
+                            string[] valuesToDelete = { 
+                                "ProxySettings", "ProxyMode", "ProxyServer", "ProxyBypassList", 
+                                "ProxyPacUrl", "WebRtcIPHandlingPolicy", "DnsOverHttpsMode",
+                                "DnsOverHttpsTemplates", "BuiltInDnsClientEnabled", "AutoConfigURL"
+                            };
+
+                            foreach (var value in valuesToDelete)
+                            {
+                                try { key.DeleteValue(value, false); } catch { }
+                            }
+                        }
+                    }
                 }
+                catch { }
             }
-            using (RegistryKey? key = Registry.LocalMachine.OpenSubKey(basePath, true))
-            {
-                if (key != null)
-                {
-                    key.DeleteValue("ProxySettings", false);
-                    key.DeleteValue("ProxyMode", false);
-                    key.DeleteValue("ProxyServer", false);
-                    key.DeleteValue("WebRtcIPHandlingPolicy", false);
-                    key.DeleteValue("DnsOverHttpsMode", false);
-                }
-            }
+            // Sinyal gönder
+            InternetSetOption(IntPtr.Zero, 39, IntPtr.Zero, 0); // SETTINGS_CHANGED
+            InternetSetOption(IntPtr.Zero, 37, IntPtr.Zero, 0); // REFRESH
         }
     }
 }

@@ -10,7 +10,7 @@ namespace TruvaDesktop.Core
 {
     public class ApiManager
     {
-        private static readonly HttpClient client = new HttpClient();
+        private static readonly HttpClient client = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
 
         public async Task<List<Server>> GetServersAsync()
         {
@@ -111,8 +111,7 @@ namespace TruvaDesktop.Core
                             Host = node.Host,
                             Flow = node.Flow,
                             Alpn = node.Alpn,
-                            ServiceName = node.ServiceName,
-                            IsPremium = extractedCountry == "Amerika" || extractedCountry == "Japonya"
+                            ServiceName = node.ServiceName
                         });
                     }
                 }

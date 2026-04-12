@@ -42,7 +42,8 @@ namespace TruvaDesktop.Core
 
             foreach (var path in searchPaths)
             {
-                    foreach (var lnk in SafeGetFiles(path, "*.lnk"))
+                    // Rekürsif taramayı kısıtla (Derinlik: 2)
+                    foreach (var lnk in SafeGetFiles(path, "*.lnk", 0, 2))
                     {
                         try
                         {
@@ -82,8 +83,8 @@ namespace TruvaDesktop.Core
                 
                 if (Directory.Exists(discordPath))
                 {
-                    // En derinlerdeki Discord.exe'yi güvenli bir şekilde bul
-                    var files = SafeGetFiles(discordPath, "Discord.exe");
+                    // Rekürsif olmayan, sadece 2 derinlikte bak (Discord klasörü -> app-* klasörü -> Discord.exe)
+                    var files = SafeGetFiles(discordPath, "Discord.exe", 0, 2);
                     var bestDiscord = files.OrderByDescending(f => f.Length).FirstOrDefault();
                     if (bestDiscord != null)
                     {
@@ -178,15 +179,30 @@ namespace TruvaDesktop.Core
             }
         }
 
-        private static List<string> SafeGetFiles(string path, string searchPattern)
+        private static List<string> SafeGetFiles(string path, string searchPattern, int currentDepth = 0, int maxDepth = 10)
         {
             var files = new List<string>();
+            if (currentDepth > maxDepth) return files;
+
+            // Taramayı yavaşlatan veya gereksiz olan klasörleri atla (Kararlılık için kritik)
+            string[] blacklistedFolders = { 
+                "node_modules", "temp", "cache", ".git", "bin", "obj", 
+                "packages", ".vscode", ".idea", "local", "locallow", "roaming" 
+            };
+
             try
             {
+                if (!Directory.Exists(path)) return files;
+                string folderName = Path.GetFileName(path).ToLower();
+                
+                // Kara listedeki klasörlere girmeyi reddet
+                if (blacklistedFolders.Contains(folderName)) return files;
+
                 files.AddRange(Directory.GetFiles(path, searchPattern, SearchOption.TopDirectoryOnly));
+                
                 foreach (var directory in Directory.GetDirectories(path))
                 {
-                    files.AddRange(SafeGetFiles(directory, searchPattern));
+                    files.AddRange(SafeGetFiles(directory, searchPattern, currentDepth + 1, maxDepth));
                 }
             }
             catch (UnauthorizedAccessException) { }

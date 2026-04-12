@@ -1,0 +1,63 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:System="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Navigation -->
+    <System:String x:Key="NavConnection">BAĞLANTI</System:String>
+    <System:String x:Key="NavGame">OYUN MODU</System:String>
+    <System:String x:Key="NavNitro">NİTRO GEÇİT</System:String>
+    <System:String x:Key="NavApps">UYGULAMALAR</System:String>
+    <System:String x:Key="NavSafety">GÜVENLİK</System:String>
+
+    <!-- Content Sections -->
+    <System:String x:Key="TitleSystemConn">Sistem Geneli Bağlantı</System:String>
+    <System:String x:Key="DescSystemConn">Tüm bilgisayarı VPN tüneline alarak tam koruma sağlar.</System:String>
+    <System:String x:Key="HeaderServerSelect">Sunucu Seçimi</System:String>
+    <System:String x:Key="CheckGameMode">🎯 Sadece Oyun Trafiği (UDP Optimize)</System:String>
+    <System:String x:Key="BtnConnectAction">SİSTEME BAĞLA</System:String>
+    <System:String x:Key="FooterConnInfo">Seçili sunucu üzerindeki trafik şifrelenmiş tünel üzerinden geçer.</System:String>
+
+    <System:String x:Key="TitleNitro">Nitro Geçit Hattı</System:String>
+    <System:String x:Key="DescNitro"></System:String>
+    <System:String x:Key="HeaderNitroAppList">Nitro Uygulama Listesi</System:String>
+    <System:String x:Key="BtnNitroStart">NİTRO'YU BAŞLAT</System:String>
+    <System:String x:Key="BtnNitroStop">NİTRO'YU DURDUR</System:String>
+    <System:String x:Key="NitroStatusActive">NİTRO AKTİF - Hızlı Erişim Devrede</System:String>
+
+    <System:String x:Key="TitleAppConn">Uygulama Bazlı Bağlantı</System:String>
+    <System:String x:Key="DescAppConn">Yalnızca listenizdeki uygulamaları VPN tüneline dahil eder.</System:String>
+    <System:String x:Key="HeaderAppList">Uygulama Filtresi</System:String>
+    <System:String x:Key="BtnClearList">Tümünü Temizle</System:String>
+    <System:String x:Key="BtnRemoveSelected">Seçileni Sil</System:String>
+    <System:String x:Key="BtnAddApp">Uygulama Ekle</System:String>
+    <System:String x:Key="HeaderAppServer">Uygulama Sunucusu</System:String>
+    <System:String x:Key="BtnConnectAppAction">UYG. İLE BAĞLA</System:String>
+    <System:String x:Key="FooterAppInfo">Listeniz dışındaki uygulamalar yerel IP'nizi kullanmaya devam eder.</System:String>
+
+    <System:String x:Key="TitleSafety">Güvenlik ve Gizlilik</System:String>
+    <System:String x:Key="DescSafety">İnternetteki izlerinizi silin ve konumunuzu tamamen gizleyin.</System:String>
+    <System:String x:Key="CheckToggleSpoofing">🛡️ Kimlik Gizleme (Spoofing)</System:String>
+    <System:String x:Key="HeaderSpoofRegion">Hedef Bölge</System:String>
+
+
+
+    <!-- Status Bar -->
+    <System:String x:Key="StatusDisconnected">Bağlantı Yok</System:String>
+    <System:String x:Key="StatusConnecting">Bağlanılıyor...</System:String>
+    <System:String x:Key="StatusUpdating">Sunucular Güncelleniyor...</System:String>
+    <System:String x:Key="StatusConnected">KORUMALISINIZ</System:String>
+    <System:String x:Key="StatusSelectServer">Lütfen bir sunucu seçin.</System:String>
+
+    <System:String x:Key="LabelVpnStatus">VPN DURUMU</System:String>
+
+    <!-- Lock Screen -->
+    <System:String x:Key="LockTitle">OTURUM SÜRESİ DOLDU</System:String>
+    <System:String x:Key="LockDesc">Devam etmek için 6 haneli erişim kodunu girin. Kod almak için 'Kazık Savar' uygulamasını kullanın.</System:String>
+    <System:String x:Key="LockPlaceholder">6 Haneli Kod</System:String>
+    <System:String x:Key="LockBtnUnlock">ERİŞİMİ ONAYLA</System:String>
+    <System:String x:Key="LockBtnGetCode">YENİ KOD AL (KAZIK SAVAR)</System:String>
+    <System:String x:Key="LockStatusValidating">Kod Doğrulanıyor...</System:String>
+    <System:String x:Key="LockSessionInfo">OTURUM KALAN SÜRE</System:String>
+    <System:String x:Key="LockSessionExpired">Oturum Süresi Bitti! Yeniden Bağlanmak İçin Kod Gerekli.</System:String>
+
+</ResourceDictionary>
